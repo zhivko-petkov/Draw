@@ -255,5 +255,28 @@ namespace Draw
         {
 
         }
+
+        private void pickUpSpeedButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBtn_Click(object sender, EventArgs e)
+        {
+            if (MultipleSelector.Checked)
+            {
+				statusBar.Items[0].Text = "Последно действие: Групиране на елементите";
+				dialogProcessor.GroupShapes();
+				viewPort.Invalidate();
+			}
+
+        }
+
+        private void UngroupBtn_Click(object sender, EventArgs e)
+        {
+			statusBar.Items[0].Text = "Последно действие: Разгрупиране на елементите";
+			dialogProcessor.UngroupShapes();
+			viewPort.Invalidate();
+        }
     }
 }

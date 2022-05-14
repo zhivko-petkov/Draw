@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
@@ -34,6 +35,7 @@ namespace Draw
 
 		#region PropertiesRectangle
 
+		
 		/// <summary>
 		/// Обхващащ правоъгълник на елемента.
 		/// </summary>
@@ -95,13 +97,15 @@ namespace Draw
 		#endregion
 
 		private Matrix transformationMatrix = new Matrix();
-		public virtual Matrix TransformationMatrix
+        internal IEnumerable<Shape> subShapes;
+
+        public virtual Matrix TransformationMatrix
         {
 			get { return transformationMatrix; }
 			set { transformationMatrix = value; }
         }
 
-
+		
 		/// <summary>
 		/// Проверка дали точка point принадлежи на елемента.
 		/// </summary>
@@ -122,5 +126,15 @@ namespace Draw
 			//shape.Rectangle.Inflate(shape.BorderWidth, shape.BorderWidth);
 		}
 
-	}
+        public virtual void TranslateSubShapes(float x, float y)
+        {
+			Location = new PointF(Location.X + x, Location.Y + y);
+		}
+
+		//За да можем да деселектираме фигурите
+        public virtual List<Shape> GetShapes()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

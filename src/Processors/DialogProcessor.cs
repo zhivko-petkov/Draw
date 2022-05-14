@@ -176,7 +176,14 @@ namespace Draw
 		{
 			if (selection != null)
 			{
-				selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
+                if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+                {
+					selection.TranslateSubShapes(p.X - lastLocation.X, p.Y - lastLocation.Y);
+				} else
+                {
+					selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
+                }
+				
 				lastLocation = p;
 			}
 			
@@ -189,7 +196,14 @@ namespace Draw
 			{
 				foreach (Shape currentSelection in multipleSelection)
 				{
-					currentSelection.Location = new PointF(currentSelection.Location.X + p.X - lastLocation.X, currentSelection.Location.Y + p.Y - lastLocation.Y);
+                    if (currentSelection.GetType().Name.ToString().Equals("SubShapesClass")){
+						currentSelection.TranslateSubShapes(p.X - lastLocation.X, p.Y - lastLocation.Y);
+					} 
+					else
+                    {
+						currentSelection.Location = new PointF(currentSelection.Location.X + p.X - lastLocation.X, currentSelection.Location.Y + p.Y - lastLocation.Y);
+                    }
+					
 				}
 			}
 
@@ -251,5 +265,69 @@ namespace Draw
 			}
 
 		}
+	
+		public void GroupShapes()
+        {
+			
+			var minX = float.PositiveInfinity;
+			var maxX = float.NegativeInfinity;
+			var minY = float.PositiveInfinity;
+			var maxY = float.NegativeInfinity;
+
+			foreach(Shape currentShape in multipleSelection){
+				if(minX > currentShape.Location.X)
+                {
+					minX = currentShape.Location.X;
+                }
+				if(minY > currentShape.Location.Y)
+                {
+					minY = currentShape.Location.Y; 
+                }
+				if(maxX < currentShape.Location.X + currentShape.Width)
+                {
+					maxX = currentShape.Location.X + currentShape.Width;
+                }
+				if (maxY < currentShape.Location.Y + currentShape.Height)
+				{
+					maxY = currentShape.Location.Y + currentShape.Height;
+				}
+			}
+
+			//list with shapes
+			SubShapesClass selectedShapes = new SubShapesClass(new RectangleF(minX, minY, maxX-minX, maxY-minY));
+
+			List<Shape> cShape = new List<Shape>(); 
+			foreach(Shape shape in multipleSelection)
+            {
+				cShape.Add(shape);
+            }
+
+			foreach(Shape shape in cShape)
+            {
+				
+				selectedShapes.subShapes.Add(shape);
+				multipleSelection.Remove(shape);
+				ShapeList.Remove(shape);
+				
+            }
+			ShapeList.Add(selectedShapes);
+			multipleSelection.Add(selectedShapes);
+			selectedShapes.subShapes.ForEach(a => a.FillColor = FillColor);
+			selectedShapes.subShapes.ForEach(a => a.StrokeColor = StrokeColor); 
+			
+
+		}
+		
+		public void UngroupShapes()
+        {
+            if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+            {
+				foreach(Shape currentShape in selection.GetShapes())
+                {
+					ShapeList.Add(currentShape);
+                }
+            }
+			ShapeList.Remove(selection);
+        }
 	}
 }

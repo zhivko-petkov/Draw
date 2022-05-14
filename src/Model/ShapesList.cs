@@ -16,6 +16,8 @@ namespace Draw.src.Model
             using (Stream stream = File.Open(file, FileMode.Create))
             {
                 BinaryFormatter bin = new BinaryFormatter();
+                //create wrapper obvivka и слагаме анотаьия (matrix 
+                //можем да направим OVERRIDE в диалоговия процесор на дисплейния процесор и така ще ни ги изчертае
                 bin.Serialize(stream, this);
             }
         }
