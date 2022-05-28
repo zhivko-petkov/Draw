@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace Draw
 {
@@ -96,14 +95,20 @@ namespace Draw
 
 		#endregion
 
-		private Matrix transformationMatrix = new Matrix();
+		//Име на примитив
+		private string name;
+		public virtual string Name { get; set; }
+		/*
+		private Matrix transformationMatrix = new Matrix();*/
+
         internal IEnumerable<Shape> subShapes;
 
+		/*
         public virtual Matrix TransformationMatrix
         {
 			get { return transformationMatrix; }
 			set { transformationMatrix = value; }
-        }
+        }*/
 
 		
 		/// <summary>
@@ -132,6 +137,7 @@ namespace Draw
 		}
 
 		//За да можем да деселектираме фигурите
+		//override в SubShapes
         public virtual List<Shape> GetShapes()
         {
             throw new NotImplementedException();

@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
 using Draw.src.Model;
 
 namespace Draw
@@ -8,7 +12,7 @@ namespace Draw
 	public class DialogProcessor : DisplayProcessor
 	{
 		#region Constructor
-
+		private static int numberOfPrimitives = 0; 
 		public DialogProcessor()
 		{
 		}
@@ -74,6 +78,7 @@ namespace Draw
 		/// <summary>
 		/// Добавя примитив - правоъгълник на произволно място върху клиентската област.
 		/// </summary>
+		//Rectangle
 		public void AddRandomRectangle()
 		{
 			Random rnd = new Random();
@@ -81,25 +86,29 @@ namespace Draw
 			int y = rnd.Next(100, 600);
 
 			RectangleShape rect = new RectangleShape(new Rectangle(x, y, 100, 200));
+			numberOfPrimitives++; 
+			rect.Name = "Rectangle" + numberOfPrimitives; 
 			rect.FillColor = FillColor;
 			rect.StrokeColor = StrokeColor;
 
 			ShapeList.Add(rect);
 		}
-
+		
+		//Line
 		public void AddRandomLine() {
 			Random rnd = new Random();
 			int x = rnd.Next(100, 1000);
 			int y = rnd.Next(100, 600);
 
 			Line line = new Line(new RectangleF(x, y, 100, 200));
-
+			numberOfPrimitives++;
+			line.Name = "Line" + numberOfPrimitives;
 			line.StrokeColor = StrokeColor;
 
 			ShapeList.Add(line);
 		}
-
-
+		
+		//Oval
 		public void AddRandomOval()
 		{
 			Random rnd = new Random();
@@ -107,15 +116,17 @@ namespace Draw
 			int y = rnd.Next(100, 600);
 
 			OvalShape ellipse = new OvalShape(new Rectangle(x, y, 100, 200));
-
+			numberOfPrimitives++;
+			ellipse.Name = "Ellipse" + numberOfPrimitives;
 			//ROTATE 45 DEGREES OUR SHAPE
 			//ellipse.TransformationMatrix.RotateAt(45, new PointF(ellipse.Rectangle.X + ellipse.Rectangle.Width / 2, ellipse.Rectangle.X + ellipse.Rectangle.Height / 2));
-            
+
 			ellipse.FillColor = FillColor;
 			ellipse.StrokeColor = StrokeColor;
 			ShapeList.Add(ellipse);
 		}
 
+		//Square
 		public void AddRandomSquare()
 		{
 			Random rnd = new Random();
@@ -125,13 +136,13 @@ namespace Draw
 			SquareShape square = new SquareShape(new Rectangle(x, y, 100, 100));
 			square.FillColor = FillColor;
 			square.StrokeColor = StrokeColor;
-
+			numberOfPrimitives++;
+			square.Name = "Square" + numberOfPrimitives;
 
 			ShapeList.Add(square);
 
 		}
-
-
+		//Oval
 		public void AddRandomTriangle()
 		{
 			Random rnd = new Random();
@@ -142,7 +153,8 @@ namespace Draw
 
 			triangle.FillColor = FillColor;
 			triangle.StrokeColor = StrokeColor;
-
+			numberOfPrimitives++;
+			triangle.Name = "Triangle" + numberOfPrimitives;
 			ShapeList.Add(triangle);
 		}
 
@@ -161,7 +173,7 @@ namespace Draw
 			{
 				if (ShapeList[i].Contains(point))
 				{
-					ShapeList[i].FillColor = Color.Lavender;
+					//ShapeList[i].FillColor = Color.Lavender;
 					return ShapeList[i];
 				} 
 			}
@@ -210,12 +222,13 @@ namespace Draw
 			lastLocation = p;
 		}
 
-		public void ResizeElementEnlarge()
+		public void ResizeElementEnlarge(float size)
 		{
 			if(selection != null)
             {
-				selection.Height += 5;
-				selection.Width += 5;
+				selection.Height += size;
+				selection.Width += size;
+				selection.Name += "Resizned with " + size;
             }
 			
 
@@ -223,20 +236,30 @@ namespace Draw
             {
 				foreach (Shape currentSelection in multipleSelection)
 				{
-					currentSelection.Height += 5;
-					currentSelection.Width += 5;
+					currentSelection.Height += size;
+					currentSelection.Width += size;
+					currentSelection.Name += "Resizned with " + size;
 				}
 			}
 			//selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
 			//lastLocation = p;
 		}
 
-		public void ResizeElementReduce()
+		public void ResizeElementReduce(float size)
 		{
+			string message = "Въведете по-ниски стойности за намаляване размера на примитива";
 			if (selection != null)
 			{
-				selection.Height += 5;
-				selection.Width += 5;
+				
+				if (selection.Height - size > 0 && selection.Width - size > 0)
+				{
+					selection.Height -= size;
+					selection.Width -= size;
+                } else
+                {
+					MessageBox.Show(message, "Намаляване на примитива");
+				}
+				
 			}
 
 
@@ -244,8 +267,15 @@ namespace Draw
 			{
 				foreach (Shape currentSelection in multipleSelection)
 				{
-					currentSelection.Height -= 5;
-					currentSelection.Width -= 5;
+					if (currentSelection.Height - size > 0 && currentSelection.Width - size > 0)
+					{
+						currentSelection.Height -= size;
+						currentSelection.Width -= size;
+					}
+					else
+					{
+						MessageBox.Show(message, "Намаляване на примитива");
+					}
 				}
 			}
 
@@ -268,66 +298,141 @@ namespace Draw
 	
 		public void GroupShapes()
         {
-			
-			var minX = float.PositiveInfinity;
-			var maxX = float.NegativeInfinity;
-			var minY = float.PositiveInfinity;
-			var maxY = float.NegativeInfinity;
+			if(multipleSelection.Count > 0)
+            {
+				var minX = float.PositiveInfinity;
+				var maxX = float.NegativeInfinity;
+				var minY = float.PositiveInfinity;
+				var maxY = float.NegativeInfinity;
 
-			foreach(Shape currentShape in multipleSelection){
-				if(minX > currentShape.Location.X)
-                {
-					minX = currentShape.Location.X;
-                }
-				if(minY > currentShape.Location.Y)
-                {
-					minY = currentShape.Location.Y; 
-                }
-				if(maxX < currentShape.Location.X + currentShape.Width)
-                {
-					maxX = currentShape.Location.X + currentShape.Width;
-                }
-				if (maxY < currentShape.Location.Y + currentShape.Height)
-				{
-					maxY = currentShape.Location.Y + currentShape.Height;
+				foreach(Shape currentShape in multipleSelection){
+					if(minX > currentShape.Location.X)
+					{
+						minX = currentShape.Location.X;
+					}
+					if(minY > currentShape.Location.Y)
+					{
+						minY = currentShape.Location.Y; 
+					}
+					if(maxX < currentShape.Location.X + currentShape.Width)
+					{
+						maxX = currentShape.Location.X + currentShape.Width;
+					}
+					if (maxY < currentShape.Location.Y + currentShape.Height)
+					{
+						maxY = currentShape.Location.Y + currentShape.Height;
+					}
 				}
+
+				//list with shapes
+				SubShapesClass selectedShapes = new SubShapesClass(new RectangleF(minX, minY, maxX-minX, maxY-minY));
+
+				List<Shape> cShape = new List<Shape>(); 
+				foreach(Shape shape in multipleSelection)
+				{
+					cShape.Add(shape);
+				}
+
+				foreach(Shape shape in cShape)
+				{
+				
+					selectedShapes.subShapes.Add(shape);
+					multipleSelection.Remove(shape);
+					ShapeList.Remove(shape);
+				
+				}
+				selectedShapes.Name = "Group" + numberOfPrimitives; 
+				ShapeList.Add(selectedShapes);
+				multipleSelection.Add(selectedShapes);
+				selectedShapes.subShapes.ForEach(a => a.FillColor = FillColor);
+				selectedShapes.subShapes.ForEach(a => a.StrokeColor = StrokeColor); 
+            } else
+            {
+				MessageBox.Show("Моля направете множествена селекция на примитиви, за да ги групирате!", "Групиране на примитиви");
 			}
-
-			//list with shapes
-			SubShapesClass selectedShapes = new SubShapesClass(new RectangleF(minX, minY, maxX-minX, maxY-minY));
-
-			List<Shape> cShape = new List<Shape>(); 
-			foreach(Shape shape in multipleSelection)
-            {
-				cShape.Add(shape);
-            }
-
-			foreach(Shape shape in cShape)
-            {
-				
-				selectedShapes.subShapes.Add(shape);
-				multipleSelection.Remove(shape);
-				ShapeList.Remove(shape);
-				
-            }
-			ShapeList.Add(selectedShapes);
-			multipleSelection.Add(selectedShapes);
-			selectedShapes.subShapes.ForEach(a => a.FillColor = FillColor);
-			selectedShapes.subShapes.ForEach(a => a.StrokeColor = StrokeColor); 
 			
-
+			
 		}
 		
 		public void UngroupShapes()
         {
-            if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+			if(selection != null) {
+				if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+				{
+					foreach(Shape currentShape in selection.GetShapes())
+					{
+						ShapeList.Add(currentShape);
+					}
+					numberOfPrimitives--;
+					ShapeList.Remove(selection);
+				} else
+				{
+					MessageBox.Show("Моля направете селекция на група, а не на единичен елемент!", "Разгрупиране на примитиви");
+				}
+			} else
             {
-				foreach(Shape currentShape in selection.GetShapes())
-                {
-					ShapeList.Add(currentShape);
-                }
-            }
-			ShapeList.Remove(selection);
+				MessageBox.Show("Моля направете селекция на група!", "Разгрупиране на примитиви");
+			}
+           
+			
         }
+
+		public void OpacityShape(int opacity)
+        {
+			if(Selection != null && multipleSelection.Count == 0)
+            {
+				Selection.FillColor = Color.FromArgb((int)(255-opacity*2.55), Selection.FillColor);
+                if (Selection.GetType().Name.ToString().Equals("SubShapesClass"))
+                {
+					foreach (Shape shape in Selection.GetShapes())
+					{
+						shape.FillColor = Color.FromArgb(opacity, shape.FillColor);
+					}
+				}
+
+            } else if(multipleSelection.Count > 0 && Selection == null)
+            {
+				foreach(Shape currentShape in multipleSelection)
+                {
+					currentShape.FillColor = Color.FromArgb(opacity, currentShape.FillColor);
+					if (currentShape.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						foreach(Shape shape in currentShape.GetShapes())
+                        {
+							shape.FillColor = Color.FromArgb(opacity, currentShape.FillColor);
+						}
+					}
+				}
+				
+            } else
+            {
+				MessageBox.Show("Няма селектирани примитиви на които да приложите прозрачност", "Прозрачност на примитиви");
+            }
+			
+        }
+
+		public void RemoveShape()
+		{
+			bool isRemoveEl = false;
+			if (selection != null)
+			{
+				ShapeList.Remove(selection);
+				isRemoveEl = true;
+			}
+			if (multipleSelection != null)
+            {
+				foreach(Shape currentShape in multipleSelection)
+                {
+					ShapeList.Remove(currentShape); 
+                }
+				MultipleSelection.Clear();
+				isRemoveEl = true;
+            }
+            if (!isRemoveEl)
+            {
+				MessageBox.Show("Няма селектирани елементи за изтриване", "Премахване на елемент");
+            }
+			
+		}
 	}
 }

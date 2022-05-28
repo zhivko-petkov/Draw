@@ -108,26 +108,29 @@ namespace Draw
 			//center Rectangle.X/2 => center => radius
 		}
 
-		/// <summary>
-		/// Прихващане на преместването на мишката.
-		/// Ако сме в режм на "влачене", то избрания елемент се транслира.
-		/// </summary>
+		//Прихващане на преместването на мишката.
+		// Ако сме в режм на "влачене", то избрания елемент се транслира.
 		void ViewPortMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
 			this.PointerPosition.Text = "X: " + e.Location.X.ToString() + " Y: " + e.Location.Y.ToString();
+			
+
 			
 				if (dialogProcessor.IsDragging)
 				{
 					if (dialogProcessor.Selection != null || dialogProcessor.MultipleSelection != null)
 						statusBar.Items[0].Text = "Последно действие: Влачене";
+						
                 
 				if (MultipleSelector.Checked)
                 {
+					this.NameOfCurrentSelection.Text = "Multiple selection";
 					dialogProcessor.TranslateMultipleSelectionTo(e.Location);
                 }
                 
 				if (pickUpSpeedButton.Checked)
                 {
+					this.NameOfCurrentSelection.Text = dialogProcessor.Selection.Name;
 					dialogProcessor.TranslateTo(e.Location);
                 }	
 					viewPort.Invalidate();
@@ -135,15 +138,14 @@ namespace Draw
 				
 		}
 
-		/// <summary>
-		/// Прихващане на отпускането на бутона на мишката.
-		/// Излизаме от режим "влачене".
-		/// </summary>
+		//Прихващане на отпускането на бутона на мишката.
+		// Излизаме от режим "влачене".
 		void ViewPortMouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
 			dialogProcessor.IsDragging = false;
 		}
 
+		//Ellipse
 		private void ellipseBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.AddRandomOval();
@@ -152,7 +154,7 @@ namespace Draw
 
 			viewPort.Invalidate();
 		}
-
+		//Fill collor primitive
         private void FillColorBtn_Click(object sender, EventArgs e)
         {
 			fillColorDialog.ShowDialog();
@@ -173,25 +175,76 @@ namespace Draw
 			dialogProcessor.SetStrokeColor(strokeColorDialog.Color);
 			isInitialize = true;
 		}
-
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
-        {
+		//Resize enlarge
+		private void toolStripMenuItem2_Click(object sender, EventArgs e)
+		{
 			if (dialogProcessor.Selection != null)
 				statusBar.Items[0].Text = "Последно действие: Увеличаване размера на фигурата";
-			dialogProcessor.ResizeElementEnlarge();
+			string message = "Въведете коректни стойности за преоразмеряване на примитива.";
+			bool errorMessage = false;
+			if (toolStripTextBox1.Text != "")
+			{
+				Console.WriteLine(toolStripTextBox1.Text);
+				if (float.Parse(toolStripTextBox1.Text) > 0.01)
+				{
+					dialogProcessor.ResizeElementEnlarge(float.Parse(toolStripTextBox1.Text));
+				} else
+				{
+					errorMessage = true;
+				}
+
+			}
+			else
+			{
+				errorMessage = true;
+			}
+			if (errorMessage)
+            {
+				MessageBox.Show(message, "Увеличаване на примитива");
+				toolStripTextBox1.Clear();
+
+			}
+			toolStripTextBox1.Clear();
 			//dialogProcessor.TranslateTo(e.Location);
 			viewPort.Invalidate();
 		}
 
+		//Resize reduce
         private void reduceShapeToolStripMenuItem_Click(object sender, EventArgs e)
         {
 			if (dialogProcessor.Selection != null)
 				statusBar.Items[0].Text = "Последно действие: Намаляване размера на фигурата";
-			dialogProcessor.ResizeElementReduce();
+			
+			string message = "Въведете коректни стойности за преоразмеряване на примитива.";
+			bool errorMessage = false;
+			if (toolStripTextBox1.Text != "")
+			{
+				Console.WriteLine(toolStripTextBox1.Text);
+				if (float.Parse(toolStripTextBox1.Text) > 0.01)
+				{
+					dialogProcessor.ResizeElementReduce(float.Parse(toolStripTextBox1.Text));
+				}
+				else
+				{
+					errorMessage = true;
+				}
+
+			}
+			else
+			{
+				errorMessage = true;
+			}
+			if (errorMessage)
+			{
+				MessageBox.Show(message, "Намаляване на примитива");
+				toolStripTextBox1.Clear();
+
+			}
+			toolStripTextBox1.Clear();
 			//dialogProcessor.TranslateTo(e.Location);
 			viewPort.Invalidate();
 		}
-
+		//Add triangle
         private void triangleBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.AddRandomTriangle();
@@ -201,6 +254,7 @@ namespace Draw
 			viewPort.Invalidate();
 		}
 
+		//Add square
         private void squareBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.AddRandomSquare();
@@ -210,6 +264,7 @@ namespace Draw
 			viewPort.Invalidate();
 		}
 
+		//Add line
         private void lineBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.AddRandomLine();
@@ -229,6 +284,7 @@ namespace Draw
 
         }
 
+		//Clear workplace
         private void clearBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.ShapeList.Clear();
@@ -236,18 +292,14 @@ namespace Draw
 			viewPort.Invalidate();
 		}
 
+		//save primitives
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-			ShapesList Shapes = new ShapesList();
-			foreach(Shape shape in dialogProcessor.ShapeList)
-            {
-				Shapes.Add(shape); 
-            }
+			WrapperClass currentSave = new WrapperClass(); 
+			saveFileDialogBIN.ShowDialog();
+			currentSave.Save(saveFileDialogBIN.FileName, dialogProcessor.ShapeList); 
+			statusBar.Items[0].Text = "Последно действие: Запазване на примитивите";
 
-			Shapes.Save("C:\\Users\\Zhivko Petkov\\Documents\\fxgbxfvbxc\\shapes.bin");
-			Shapes.Clear(); 
-           
-			
 
 		}
 
@@ -259,16 +311,16 @@ namespace Draw
         private void pickUpSpeedButton_Click(object sender, EventArgs e)
         {
 
-        }
+		}
 
         private void groupBtn_Click(object sender, EventArgs e)
         {
-            if (MultipleSelector.Checked)
-            {
+
 				statusBar.Items[0].Text = "Последно действие: Групиране на елементите";
 				dialogProcessor.GroupShapes();
+				MultipleSelector.PerformClick();
 				viewPort.Invalidate();
-			}
+			
 
         }
 
@@ -277,6 +329,62 @@ namespace Draw
 			statusBar.Items[0].Text = "Последно действие: Разгрупиране на елементите";
 			dialogProcessor.UngroupShapes();
 			viewPort.Invalidate();
+        }
+
+		//Open save file
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			WrapperClass currentOpen = new WrapperClass();
+			openFileDialog1.ShowDialog();
+			dialogProcessor.ShapeList = currentOpen.Open(openFileDialog1.FileName);
+			statusBar.Items[0].Text = "Последно действие: Отваряне на файл с примитиви";
+			viewPort.Invalidate();
+		}
+
+        private void openFileDialog1_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+		
+		}
+		//resize button
+        private void toolStripTextBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+			clearBtn.PerformClick();
+        }
+
+        private void NameOfCurrentSelection_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+		
+			dialogProcessor.OpacityShape(int.Parse(OpacityTextBox.Text));
+
+        }
+
+        private void RotateAngleTextBox_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RemovePrimitiveBtn_Click(object sender, EventArgs e)
+        {
+
+			statusBar.Items[0].Text = "Последно действие: Изтриване на селектиран елемент";
+			dialogProcessor.RemoveShape();
+			viewPort.Invalidate();
+
+		}
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
