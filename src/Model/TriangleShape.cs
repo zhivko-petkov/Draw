@@ -7,7 +7,7 @@ using System.Drawing;
 namespace Draw.src.Model
 {
 	[Serializable]
-	class TriangleShape : Shape
+	class TriangleShape : Shape, ICloneable
 	{
 		public TriangleShape(RectangleF polygon) : base(polygon)
 		{
@@ -38,17 +38,24 @@ namespace Draw.src.Model
 		/// Частта, визуализираща конкретния примитив.
 		/// </summary>
 
-		public override void DrawSelf(Graphics grfx)
+		public override void DrawSelf(Graphics graphicsCurrent)
 		{
-			base.DrawSelf(grfx);
+			base.DrawSelf(graphicsCurrent);
+			base.CustomShapeRotator(graphicsCurrent);
 			Point[] currentPoints = { new Point((int)(Rectangle.Width+(int)Location.X), ((int)Location.Y)), new Point((int)(Location.X), (int)Location.Y), new Point((int)(Location.X), (int)Rectangle.Height+(int)(Location.Y)) };
 			this.points = currentPoints;
 			//Point[] points = { new Point((int)Location.X, ((int)Location.Y)), new Point((int)(Location.X), (int)Location.Y), new Point((int)(Location.X), (int)(Location.Y)) };
 			//Point[] points = { new Point((int)Location.X, (100 + (int)Location.Y)), new Point(0, 0), new Point((int)(0), (int)(0)) };
-			Pen pen = new Pen(new SolidBrush(StrokeColor));
-			grfx.FillPolygon(new SolidBrush(FillColor), points);
-			grfx.DrawPolygon(pen, points);
+			Pen penCurrent = new Pen(new SolidBrush(StrokeColor));
+			graphicsCurrent.FillPolygon(new SolidBrush(FillColor), points);
+			graphicsCurrent.DrawPolygon(penCurrent, points);
+			graphicsCurrent.ResetTransform();
 
+		}
+
+		public override object Clone()
+		{
+			return this.MemberwiseClone();
 		}
 
 

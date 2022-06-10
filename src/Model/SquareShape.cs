@@ -7,7 +7,7 @@ using System.Text;
 namespace Draw.src.Model
 {
     [Serializable]
-    class SquareShape : Shape
+    class SquareShape : Shape, ICloneable
     {
         public SquareShape(RectangleF square) : base(square)
         {
@@ -19,9 +19,9 @@ namespace Draw.src.Model
 
         }
 
-        public override bool Contains(PointF point)
+        public override bool Contains(PointF pointC)
         {
-            if (base.Contains(point))
+            if (base.Contains(pointC))
                 // Проверка дали е в обекта само, ако точката е в обхващащия правоъгълник.
                 // В случая на правоъгълник - директно връщаме true
                 return true;
@@ -30,13 +30,20 @@ namespace Draw.src.Model
                 return false;
         }
 
-        public override void DrawSelf(Graphics grfx)
+        public override void DrawSelf(Graphics graphicsC)
         {
-            base.DrawSelf(grfx);
+            base.DrawSelf(graphicsC);
+            base.CustomShapeRotator(graphicsC);
             //Color customColor = Color.FromArgb(50, Color.White);
-            Pen pen = new Pen(new SolidBrush(StrokeColor));
-            grfx.FillRectangle(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
-            grfx.DrawRectangle(pen, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+            Pen penCurrent = new Pen(new SolidBrush(StrokeColor));
+            graphicsC.FillRectangle(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+            graphicsC.DrawRectangle(penCurrent, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+            graphicsC.ResetTransform();
+        }
+
+        public override object Clone()
+        {
+            return this.MemberwiseClone();
         }
 
 

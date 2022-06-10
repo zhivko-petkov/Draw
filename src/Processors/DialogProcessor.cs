@@ -20,7 +20,7 @@ namespace Draw
 		#endregion
 
 		#region Properties
-
+		
 		/// <summary>
 		/// Избран елемент.
 		/// </summary>
@@ -43,6 +43,16 @@ namespace Draw
 		/// <summary>
 		/// Дали в момента диалога е в състояние на "влачене" на избрания елемент.
 		/// </summary>
+		/// 
+
+		//Копирани елементи
+		private List<Shape> copiedElements = new List<Shape>();
+		public List<Shape> CopiedElements
+        {
+			get { return copiedElements; }
+			set { copiedElements = value;  }
+        }
+
 		private bool isDragging;
 		public bool IsDragging
 		{
@@ -73,6 +83,90 @@ namespace Draw
 		public void SetStrokeColor(Color color)
 		{
 			this.StrokeColor = color;
+		}
+
+		//Change color with bucket
+		public void SetBackgroundSelection(Color color)
+        {
+			if(selection != null)
+            {
+				if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+				{
+					for (int i = 0; i < selection.GetShapes().Count; i++)
+					{
+
+						selection.GetShapes()[i].Name += "Recolor with " + color.Name;
+						selection.GetShapes()[i].FillColor = color;
+
+					}
+				}
+				else
+				{
+					this.selection.FillColor = color;
+				}
+				
+            }
+			
+			if(this.multipleSelection.Count > 0)
+            {
+				multipleSelection.ForEach(a => {
+					if (a.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						for (int i = 0; i < a.GetShapes().Count; i++)
+						{
+
+							a.GetShapes()[i].Name += "Recolor with " + color.Name;
+							a.GetShapes()[i].FillColor = color;
+
+						}
+					} else
+                    {
+						a.FillColor = color;
+                    }
+				});
+			}
+        }
+
+		public void SetStrokeSelection(Color color)
+        {
+			if (selection != null)
+			{
+				if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+				{
+					for (int i = 0; i < selection.GetShapes().Count; i++)
+					{
+
+						selection.GetShapes()[i].Name += "Recolor with " + color.Name;
+						selection.GetShapes()[i].StrokeColor = color;
+
+					}
+				}
+				else
+				{
+					this.selection.StrokeColor = color;
+				}
+
+			}
+
+			if (this.multipleSelection.Count > 0)
+			{
+				multipleSelection.ForEach(a => {
+					if (a.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						for (int i = 0; i < a.GetShapes().Count; i++)
+						{
+
+							a.GetShapes()[i].Name += "Recolor with " + color.Name;
+							a.GetShapes()[i].StrokeColor = color;
+
+						}
+					}
+					else
+					{
+						a.StrokeColor = color;
+					}
+				});
+			}
 		}
 
 		/// <summary>
@@ -159,6 +253,7 @@ namespace Draw
 		}
 
 
+
 		/// <summary>
 		/// Проверява дали дадена точка е в елемента.
 		/// Обхожда в ред обратен на визуализацията с цел намиране на
@@ -184,19 +279,19 @@ namespace Draw
 		/// Транслация на избраният елемент на вектор определен от <paramref name="p>p</paramref>
 		/// </summary>
 		/// <param name="p">Вектор на транслация.</param>
-		public void TranslateTo(PointF p)
+		public void TranslateTo(PointF enterPoint)
 		{
 			if (selection != null)
 			{
                 if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
                 {
-					selection.TranslateSubShapes(p.X - lastLocation.X, p.Y - lastLocation.Y);
+					selection.TranslateSubShapes(enterPoint.X - lastLocation.X, enterPoint.Y - lastLocation.Y);
 				} else
                 {
-					selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
+					selection.Location = new PointF(selection.Location.X + enterPoint.X - lastLocation.X, selection.Location.Y + enterPoint.Y - lastLocation.Y);
                 }
 				
-				lastLocation = p;
+				lastLocation = enterPoint;
 			}
 			
             
@@ -226,9 +321,23 @@ namespace Draw
 		{
 			if(selection != null)
             {
-				selection.Height += size;
-				selection.Width += size;
-				selection.Name += "Resizned with " + size;
+				if(selection.GetType().Name.ToString().Equals("SubShapesClass"))
+                {
+					for(int i = 0; i < selection.GetShapes().Count; i++)
+                    {
+						selection.GetShapes()[i].Height += size;
+						selection.GetShapes()[i].Width += size;
+						selection.GetShapes()[i].Name += "Resized with " + size;
+						selection.Width += size / 2;
+						selection.Height += size / 2;
+					}
+                } else
+                {
+					selection.Height += size;
+					selection.Width += size;
+					selection.Name += "Resized with " + size;
+                }
+				
             }
 			
 
@@ -236,13 +345,27 @@ namespace Draw
             {
 				foreach (Shape currentSelection in multipleSelection)
 				{
-					currentSelection.Height += size;
-					currentSelection.Width += size;
-					currentSelection.Name += "Resizned with " + size;
+					if (currentSelection.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						for (int i = 0; i < currentSelection.GetShapes().Count; i++)
+						{
+							currentSelection.GetShapes()[i].Height += size;
+							currentSelection.GetShapes()[i].Width += size;
+							currentSelection.GetShapes()[i].Name += "Resized with " + size; 
+							currentSelection.Width += size/2;
+							currentSelection.Height += size/2;
+						}
+					}
+					else
+					{
+						currentSelection.Height += size;
+						currentSelection.Width += size;
+						currentSelection.Name += "Resized with " + size;
+					}
 				}
+
 			}
-			//selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
-			//lastLocation = p;
+
 		}
 
 		public void ResizeElementReduce(float size)
@@ -250,15 +373,37 @@ namespace Draw
 			string message = "Въведете по-ниски стойности за намаляване размера на примитива";
 			if (selection != null)
 			{
-				
-				if (selection.Height - size > 0 && selection.Width - size > 0)
+				if (selection.GetType().Name == "SubShapesClass")
 				{
-					selection.Height -= size;
-					selection.Width -= size;
-                } else
-                {
-					MessageBox.Show(message, "Намаляване на примитива");
+					for (int i = 0; i < selection.GetShapes().Count; i++)
+					{
+						
+						if (selection.GetShapes()[i].Height - size > 0 && selection.GetShapes()[i].Width - size > 0)
+						{
+							selection.GetShapes()[i].Height -= size;
+							selection.GetShapes()[i].Width -= size;
+							selection.Width -= size / 2;
+							selection.Height -= size / 2;
+						}
+						else
+						{
+							MessageBox.Show(message, "Намаляване на примитива");
+						}
+					}
 				}
+				else
+				{
+					if (selection.Height - size > 0 && selection.Width - size > 0)
+					{
+						selection.Height -= size;
+						selection.Width -= size;
+					}
+					else
+					{
+						MessageBox.Show(message, "Намаляване на примитива");
+					}
+				}
+				
 				
 			}
 
@@ -267,14 +412,35 @@ namespace Draw
 			{
 				foreach (Shape currentSelection in multipleSelection)
 				{
-					if (currentSelection.Height - size > 0 && currentSelection.Width - size > 0)
+					if (currentSelection.GetType().Name.ToString().Equals("SubShapesClass"))
 					{
-						currentSelection.Height -= size;
-						currentSelection.Width -= size;
+						for (int i = 0; i < currentSelection.GetShapes().Count; i++)
+						{
+
+							if (currentSelection.GetShapes()[i].Height - size > 0 && currentSelection.GetShapes()[i].Width - size > 0)
+							{
+								currentSelection.GetShapes()[i].Height -= size;
+								currentSelection.GetShapes()[i].Width -= size;
+								currentSelection.Width -= size / 2;
+								currentSelection.Height -= size / 2;
+							}
+							else
+							{
+								MessageBox.Show(message, "Намаляване на примитива");
+							}
+						}
 					}
 					else
 					{
-						MessageBox.Show(message, "Намаляване на примитива");
+						if (currentSelection.Height - size > 0 && currentSelection.Width - size > 0)
+						{
+							currentSelection.Height -= size;
+							currentSelection.Width -= size;
+						}
+						else
+						{
+							MessageBox.Show(message, "Намаляване на примитива");
+						}
 					}
 				}
 			}
@@ -282,6 +448,48 @@ namespace Draw
 
 			//selection.Location = new PointF(selection.Location.X + p.X - lastLocation.X, selection.Location.Y + p.Y - lastLocation.Y);
 			//lastLocation = p;
+		}
+
+		public void CustomRotationElement(int rotation)
+        {
+
+			if (selection != null)
+			{
+				if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
+				{
+					for (int i = 0; i < selection.GetShapes().Count; i++)
+					{
+						selection.GetShapes()[i].SubCurrentAngle = rotation;
+
+					}
+				}
+				else
+				{
+					selection.SubCurrentAngle = rotation;
+				}
+				
+
+			}
+
+
+			if (multipleSelection != null)
+			{
+				foreach (Shape currentSelection in multipleSelection)
+				{
+					if (currentSelection.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						for (int i = 0; i < currentSelection.GetShapes().Count; i++)
+						{
+							currentSelection.GetShapes()[i].SubCurrentAngle = rotation;
+						}
+					}
+					else
+					{
+						currentSelection.SubCurrentAngle = rotation;
+					}
+				}
+
+			}
 		}
 
 		public override void DrawShape(Graphics grfx, Shape item)
@@ -379,18 +587,18 @@ namespace Draw
 
 		public void OpacityShape(int opacity)
         {
-			if(Selection != null && multipleSelection.Count == 0)
+			if(selection != null && multipleSelection.Count == 0)
             {
-				Selection.FillColor = Color.FromArgb((int)(255-opacity*2.55), Selection.FillColor);
-                if (Selection.GetType().Name.ToString().Equals("SubShapesClass"))
+				selection.FillColor = Color.FromArgb((int)(255-opacity*2.55), selection.FillColor);
+                if (selection.GetType().Name.ToString().Equals("SubShapesClass"))
                 {
-					foreach (Shape shape in Selection.GetShapes())
+					foreach (Shape shape in selection.GetShapes())
 					{
 						shape.FillColor = Color.FromArgb(opacity, shape.FillColor);
 					}
 				}
 
-            } else if(multipleSelection.Count > 0 && Selection == null)
+            } else if(multipleSelection.Count > 0 && selection == null)
             {
 				foreach(Shape currentShape in multipleSelection)
                 {
@@ -434,5 +642,244 @@ namespace Draw
             }
 			
 		}
+
+		private bool lastCopiedIsMultiple = false; 
+		public void CopyShapes()
+        {
+			if(multipleSelection.Count > 0)
+            {
+				for(int i = 0; i < multipleSelection.Count; i++)
+                {
+					 copiedElements.Add(multipleSelection[i]);
+                }
+				lastCopiedIsMultiple = true; 
+            } else
+            {
+				copiedElements.Add(selection);
+				lastCopiedIsMultiple = false; 
+            }
+        }
+
+		public void PasteShape()
+        {
+			if(copiedElements.Count > 0)
+            {
+                if (lastCopiedIsMultiple)
+                {
+					
+					foreach(Shape shape in copiedElements)
+                    {
+						/*Shape currentShape = new Shape();
+						currentShape.Name = shape.Name;
+						currentShape.Height = shape.Height;
+						currentShape.Location = shape.Location; 
+						
+						currentShape.StrokeColor = shape.StrokeColor; */
+
+						if (shape.GetType().Name.ToString().Equals("Line"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new Line(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+							currentShape.Name = shape.Name + " - Copied";
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;	
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+
+                        } else if (shape.GetType().Name.ToString().Equals("OvalShape"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new OvalShape(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+							currentShape.Name = shape.Name + " - Copied";
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+
+						}  else if (shape.GetType().Name.ToString().Equals("RectangleShape"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new RectangleShape(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+							currentShape.Name = shape.Name + " - Copied";
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+
+						} else if (shape.GetType().Name.ToString().Equals("SquareShape"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new SquareShape(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+							currentShape.Name = shape.Name + " - Copied";
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+
+						} else if (shape.GetType().Name.ToString().Equals("SubShapesClass"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new SubShapesClass(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+                            currentShape.Name = shape.Name + " - Copied";
+							foreach(Shape sh in shape.GetShapes())
+                            {
+								Shape copy = (Shape)sh.Clone(); 
+								currentShape.SetShape(copy);
+                            }
+							
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+						} else if (shape.GetType().Name.ToString().Equals("TriangleShape"))
+                        {
+							PointF current = shape.Location;
+							current.X += 25;
+							current.Y += 25;
+							Shape currentShape = new TriangleShape(shape.Rectangle);
+							currentShape.Height = shape.Height;
+							currentShape.Width = shape.Width;
+							currentShape.Location = current;
+							currentShape.Name = shape.Name + " - Copied";
+							currentShape.StrokeColor = shape.StrokeColor;
+							currentShape.FillColor = shape.FillColor;
+							numberOfPrimitives++;
+							ShapeList.Add(currentShape);
+
+						}
+
+						/*shape.Location = current;
+						shape.Name += " - Copied";*/
+
+					}
+                }
+				else
+				{
+					Shape shape = copiedElements[(copiedElements.Count-1)]; 
+					if (shape.GetType().Name.ToString().Equals("Line"))
+					{
+						PointF current = shape.Location;
+						current.X += 25;
+						current.Y += 25;
+						Shape currentShape = new Line(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+
+					}
+					else if (shape.GetType().Name.ToString().Equals("OvalShape"))
+					{
+						PointF current = shape.Location;
+						Shape currentShape = new OvalShape(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+
+					}
+					else if (shape.GetType().Name.ToString().Equals("RectangleShape"))
+					{
+						PointF current = shape.Location;
+						current.X += 25;
+						current.Y += 25;
+						Shape currentShape = new RectangleShape(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+
+					}
+					else if (shape.GetType().Name.ToString().Equals("SquareShape"))
+					{
+						PointF current = shape.Location;
+						current.X += 25;
+						current.Y += 25;
+						Shape currentShape = new SquareShape(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+
+					}
+					else if (shape.GetType().Name.ToString().Equals("SubShapesClass"))
+					{
+						PointF current = shape.Location;
+						Shape currentShape = new SubShapesClass(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						foreach (Shape sh in shape.GetShapes())
+						{
+							Shape copy = (Shape)sh.Clone();
+							currentShape.SetShape(copy);
+						}
+
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+					}
+					else if (shape.GetType().Name.ToString().Equals("TriangleShape"))
+					{
+						PointF current = shape.Location;
+						current.X += 25;
+						current.Y += 25;
+						Shape currentShape = new TriangleShape(shape.Rectangle);
+						currentShape.Height = shape.Height;
+						currentShape.Width = shape.Width;
+						currentShape.Location = current;
+						currentShape.Name = shape.Name + " - Copied";
+						currentShape.StrokeColor = shape.StrokeColor;
+						currentShape.FillColor = shape.FillColor;
+						numberOfPrimitives++;
+						ShapeList.Add(currentShape);
+
+					}
+				}
+			} 
+        }
 	}
 }

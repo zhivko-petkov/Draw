@@ -8,7 +8,7 @@ namespace Draw
 	/// </summary>
 
 	[Serializable]
-	public class RectangleShape : Shape
+	public class RectangleShape : Shape, ICloneable
 	{
 		#region Constructor
 
@@ -29,9 +29,9 @@ namespace Draw
 		/// дали точката е в обхващащия правоъгълник на елемента (а той съвпада с
 		/// елемента в този случай).
 		/// </summary>
-		public override bool Contains(PointF point)
+		public override bool Contains(PointF pointCurr)
 		{
-			if (base.Contains(point))
+			if (base.Contains(pointCurr))
 				// Проверка дали е в обекта само, ако точката е в обхващащия правоъгълник.
 				// В случая на правоъгълник - директно връщаме true
 				return true;
@@ -43,15 +43,23 @@ namespace Draw
 		/// <summary>
 		/// Частта, визуализираща конкретния примитив.
 		/// </summary>
-		public override void DrawSelf(Graphics grfx)
+		public override void DrawSelf(Graphics graphicsC)
 		{
-			base.DrawSelf(grfx);
+			base.DrawSelf(graphicsC);
+			base.CustomShapeRotator(graphicsC);
 
-			grfx.FillRectangle(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
-			Pen pen = new Pen(new SolidBrush(StrokeColor));
+			graphicsC.FillRectangle(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			Pen penCurrent = new Pen(new SolidBrush(StrokeColor));
 
-			grfx.DrawRectangle(pen, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			graphicsC.DrawRectangle(penCurrent, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			graphicsC.ResetTransform();
 
+		}
+
+
+		public override object Clone()
+		{
+			return this.MemberwiseClone();
 		}
 	}
 }

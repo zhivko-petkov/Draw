@@ -29,6 +29,9 @@
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Draw.Program</StartupObject>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
   <ItemGroup>
     <Reference Include="System" />
@@ -78,5 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\icons8-macos-maximize-30.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icons8-color-64.png" />
   </ItemGroup>
 </Project>

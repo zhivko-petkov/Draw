@@ -184,7 +184,6 @@ namespace Draw
 			bool errorMessage = false;
 			if (toolStripTextBox1.Text != "")
 			{
-				Console.WriteLine(toolStripTextBox1.Text);
 				if (float.Parse(toolStripTextBox1.Text) > 0.01)
 				{
 					dialogProcessor.ResizeElementEnlarge(float.Parse(toolStripTextBox1.Text));
@@ -205,7 +204,6 @@ namespace Draw
 
 			}
 			toolStripTextBox1.Clear();
-			//dialogProcessor.TranslateTo(e.Location);
 			viewPort.Invalidate();
 		}
 
@@ -288,6 +286,8 @@ namespace Draw
         private void clearBtn_Click(object sender, EventArgs e)
         {
 			dialogProcessor.ShapeList.Clear();
+			dialogProcessor.MultipleSelection.Clear();
+			dialogProcessor.CopiedElements.Clear();
 			statusBar.Items[0].Text = "Последно действие: Почистване на работното поле";
 			viewPort.Invalidate();
 		}
@@ -386,5 +386,87 @@ namespace Draw
         {
 
         }
+
+        private void MainFormKeyDown(object sender, KeyEventArgs e)
+        {
+			if(e.Control && e.KeyCode == Keys.R)
+            {
+				dialogProcessor.AddRandomRectangle();
+				statusBar.Items[0].Text = "Последно действие: Създаване на правоъгълник";
+				viewPort.Invalidate();
+			}
+
+			if(e.Control && e.KeyCode == Keys.C)
+            {
+				dialogProcessor.CopyShapes();
+				statusBar.Items[0].Text = "Последно действие: Копиране на селекцията";
+				viewPort.Invalidate();
+			}
+
+			if(e.Control && e.KeyCode == Keys.V)
+            {
+				dialogProcessor.PasteShape();
+				statusBar.Items[0].Text = "Последно действие: Поставяне на селекцията";
+				viewPort.Invalidate();
+			}
+        }
+
+        private void ResizeBtn_ButtonClick(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BackgroundColor_Click(object sender, EventArgs e)
+        {
+			dialogProcessor.SetBackgroundSelection(fillColorDialog.Color);
+			dialogProcessor.SetStrokeSelection(strokeColorDialog.Color);
+		}
+
+        private void toolStripMenuItem7_Click(object sender, EventArgs e)
+        {
+			
+			dialogProcessor.CopyShapes();
+			dialogProcessor.PasteShape();
+			statusBar.Items[0].Text = "Последно действие: Дубликиране на примитив";
+			viewPort.Invalidate();
+
+		}
+
+        private void RemoveSelectedElement_Click(object sender, EventArgs e)
+        {
+			statusBar.Items[0].Text = "Последно действие: Изтриване на селектиран елемент";
+			dialogProcessor.RemoveShape();
+			viewPort.Invalidate();
+		}
+
+        private void DublicateSecButton_Click(object sender, EventArgs e)
+        {
+
+			dialogProcessor.CopyShapes();
+			dialogProcessor.PasteShape();
+			statusBar.Items[0].Text = "Последно действие: Дубликиране на примитив";
+			viewPort.Invalidate();
+		}
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+			viewPort.Invalidate();
+        }
+
+        private void Rotate_Click(object sender, EventArgs e)
+        {
+			dialogProcessor.CustomRotationElement(int.Parse(RotateAngleTextBox.Text));
+			statusBar.Items[0].Text = "Последно действие: Ротация на примитив";
+			viewPort.Invalidate();
+        }
+
+        private void OptionNewList_Click(object sender, EventArgs e)
+        {
+			WrapperClass currentOpen = new WrapperClass();
+
+			dialogProcessor.ShapeList = currentOpen.NewListWithShapes();
+			statusBar.Items[0].Text = "Последно действие: Създаване на ново работно поле";
+			viewPort.Invalidate();
+		}
     }
 }

@@ -7,8 +7,8 @@ using System.Text;
 namespace Draw.src.Model
 {
 	[Serializable]
-	class Line : Shape
-    {
+	class Line : Shape, ICloneable
+	{
 		public Line(RectangleF polygon) : base(polygon)
 		{
 
@@ -20,9 +20,9 @@ namespace Draw.src.Model
 		}
 		public Point[] points;
 		//TO DO: 
-		public override bool Contains(PointF point)
+		public override bool Contains(PointF pointCurr)
 		{
-			if (base.Contains(point))
+			if (base.Contains(pointCurr))
 				return true;
 			else
 				return false;
@@ -33,15 +33,23 @@ namespace Draw.src.Model
 		/// Частта, визуализираща конкретния примитив.
 		/// </summary>
 
-		public override void DrawSelf(Graphics grfx)
+		public override void DrawSelf(Graphics graphicsC)
 		{
-			base.DrawSelf(grfx);
+			base.DrawSelf(graphicsC);
+			base.CustomShapeRotator(graphicsC);
 			Point[] currentPoints = { new Point((int)(Rectangle.Width + (int)Location.X), ((int)Rectangle.Height + (int)Location.Y)), new Point((int)(Location.X), (int)(Location.Y)) };
 			this.points = currentPoints;
-			Pen pen = new Pen(new SolidBrush(StrokeColor));
-	
-			grfx.DrawPolygon(pen, points);
+			Pen penCurr = new Pen(new SolidBrush(StrokeColor));
+
+			graphicsC.DrawPolygon(penCurr, points);
 
 		}
-	}
+
+
+
+		public override object Clone()
+        {
+			return this.MemberwiseClone();
+		}
+    }
 }
