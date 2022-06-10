@@ -9,7 +9,7 @@ namespace Draw
 	/// </summary>
 	
 	[Serializable]
-	public abstract class Shape
+	public abstract class Shape 
 	{
 		#region Constructors
 		public Shape()
@@ -98,6 +98,10 @@ namespace Draw
 		//Име на примитив
 		private string name;
 		public virtual string Name { get; set; }
+
+		private int subCurrentAngle;
+		public virtual int SubCurrentAngle { get { return subCurrentAngle; } set { subCurrentAngle = value; } }
+		
 		/*
 		private Matrix transformationMatrix = new Matrix();*/
 
@@ -131,14 +135,31 @@ namespace Draw
 			//shape.Rectangle.Inflate(shape.BorderWidth, shape.BorderWidth);
 		}
 
-        public virtual void TranslateSubShapes(float x, float y)
+        public virtual void TranslateSubShapes(float xC, float yC)
         {
-			Location = new PointF(Location.X + x, Location.Y + y);
+			Location = new PointF( xC + Location.X, yC + Location.Y);
 		}
 
 		//За да можем да деселектираме фигурите
 		//override в SubShapes
         public virtual List<Shape> GetShapes()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void SetShape(Shape shape)
+        {
+            throw new NotImplementedException();
+        }
+
+		public virtual void CustomShapeRotator(Graphics graphics)
+        {
+			graphics.TranslateTransform(((Rectangle.Width / 2) + Rectangle.X), ((Rectangle.Height / 2) + Rectangle.Y));
+			graphics.RotateTransform(subCurrentAngle);
+			graphics.TranslateTransform(-((Rectangle.Width / 2) + Rectangle.X), -((Rectangle.Height / 2) + Rectangle.Y));
+		}
+
+        public virtual object Clone()
         {
             throw new NotImplementedException();
         }

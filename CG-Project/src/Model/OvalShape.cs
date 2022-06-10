@@ -9,7 +9,7 @@ namespace Draw
 	/// </summary>
 
 	[Serializable]
-	public class OvalShape : Shape
+	public class OvalShape : Shape, ICloneable
 	{
 		#region Constructor
 
@@ -30,13 +30,13 @@ namespace Draw
 		/// дали точката е в обхващащия правоъгълник на елемента (а той съвпада с
 		/// елемента в този случай).
 		/// </summary>
-		public override bool Contains(PointF point)
+		public override bool Contains(PointF pointCurr)
 		{
-			float px = point.X;
+			float px = pointCurr.X;
 			float x = (Rectangle.X + Rectangle.Width / 2);
 			float rx = Rectangle.Width / 2;
 
-			float py = point.Y;
+			float py = pointCurr.Y;
 			float y = (Rectangle.Y + Rectangle.Height / 2);
 			float ry = Rectangle.Height / 2;
 
@@ -58,21 +58,21 @@ namespace Draw
 		/// <summary>
 		/// Частта, визуализираща конкретния примитив.
 		/// </summary>
-		public override void DrawSelf(Graphics grfx)
+		public override void DrawSelf(Graphics graphicsC)
 		{
-			base.DrawSelf(grfx);
-			/*GraphicsState state = grfx.Save();
-			//за да можем да върнем състоянието на координатната система, преди изчисляването
-			Matrix m = grfx.Transform.Clone();
-		    m.Multiply(TransformationMatrix);
-			grfx.Transform = m; */
-			
 
-			Pen pen = new Pen(new SolidBrush(StrokeColor));
-			grfx.FillEllipse(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
-			grfx.DrawEllipse(pen, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			Pen penCurrent = new Pen(new SolidBrush(StrokeColor));
+			graphicsC.FillEllipse(new SolidBrush(FillColor), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			graphicsC.DrawEllipse(penCurrent, Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+			base.DrawSelf(graphicsC);
+			base.CustomShapeRotator(graphicsC);
 
-			//grfx.Restore(state);
+		}
+
+
+		public override object Clone()
+		{
+			return this.MemberwiseClone();
 		}
 	}
 }
